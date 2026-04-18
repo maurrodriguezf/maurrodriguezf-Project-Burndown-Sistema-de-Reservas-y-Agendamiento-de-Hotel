@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hotel Alberto · Sistema de Reservas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🏨</span>
+      <div>
+        <h1>Hotel Alberto</h1>
+        <p class="tag">Sistema de Reservas y Agendamiento</p>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <div class="dropdown">
+        <button class="dd-btn" data-dd="reservas-menu">Reservas ▾</button>
+        <div class="dd-panel" id="reservas-menu">
+          <a href="#" data-nav="disponibilidad">Ver disponibilidad</a>
+          <a href="#" data-nav="reservar">Nueva reserva</a>
+          <a href="#" data-nav="gestion">Gestionar reservas</a>
+        </div>
+      </div>
+
+      <div class="dropdown">
+        <button class="dd-btn" data-dd="hotel-menu">Hotel ▾</button>
+        <div class="dd-panel" id="hotel-menu">
+          <a href="#" data-nav="habitaciones">Habitaciones</a>
+          <a href="#" data-nav="admin">Panel Admin</a>
+        </div>
+      </div>
+
+      <div class="dropdown">
+        <button class="dd-btn" data-dd="cuenta-menu" id="cuenta-btn">Cuenta ▾</button>
+        <div class="dd-panel" id="cuenta-menu">
+          <a href="#" data-nav="login" id="link-login">Iniciar sesión</a>
+          <a href="#" data-nav="registro">Registrarse</a>
+          <a href="#" id="link-logout" style="display:none">Cerrar sesión</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div id="toast" class="toast"></div>
+
+    <!-- Disponibilidad (HU-01) -->
+    <section id="view-disponibilidad" class="view active">
+      <h2>Disponibilidad de habitaciones</h2>
+      <p class="subtitle">Consulta en tiempo real las habitaciones libres entre dos fechas.</p>
+
+      <form id="form-disponibilidad" class="card form-row">
+        <div class="field">
+          <label>Fecha entrada</label>
+          <input type="date" name="entrada" required />
+        </div>
+        <div class="field">
+          <label>Fecha salida</label>
+          <input type="date" name="salida" required />
+        </div>
+        <button type="submit" class="btn primary">Buscar</button>
+      </form>
+
+      <div id="disponibilidad-resultados" class="grid-cards"></div>
+    </section>
+
+    <!-- Nueva reserva (HU-02) -->
+    <section id="view-reservar" class="view">
+      <h2>Registrar nueva reserva</h2>
+      <p class="subtitle">Completa los datos del cliente y elige la habitación.</p>
+
+      <form id="form-reserva" class="card form-grid">
+        <div class="field">
+          <label>Habitación</label>
+          <select name="habitacion_id" id="select-habitacion" required>
+            <option value="">-- Selecciona --</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Fecha entrada</label>
+          <input type="date" name="fecha_entrada" required />
+        </div>
+        <div class="field">
+          <label>Fecha salida</label>
+          <input type="date" name="fecha_salida" required />
+        </div>
+        <div class="field">
+          <label>Nombre cliente</label>
+          <input type="text" name="cliente_nombre" required />
+        </div>
+        <div class="field">
+          <label>Email cliente</label>
+          <input type="email" name="cliente_email" required />
+        </div>
+        <div class="field">
+          <label>RUT (opcional)</label>
+          <input type="text" name="cliente_rut" />
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Confirmar reserva</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Gestión (HU-03) -->
+    <section id="view-gestion" class="view">
+      <h2>Gestión de reservas</h2>
+      <p class="subtitle">Requiere iniciar sesión. Edita fechas o cancela reservas existentes.</p>
+
+      <div id="gestion-locked" class="card lock">
+        🔒 Debes iniciar sesión para gestionar reservas.
+        <button class="btn link" data-nav="login">Ir a login</button>
+      </div>
+
+      <div id="gestion-content" style="display:none">
+        <button id="btn-reload-reservas" class="btn">🔄 Recargar</button>
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>ID</th><th>Habitación</th><th>Cliente</th><th>Entrada</th>
+              <th>Salida</th><th>Estado</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-reservas"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Habitaciones -->
+    <section id="view-habitaciones" class="view">
+      <h2>Habitaciones del hotel</h2>
+      <p class="subtitle">Catálogo completo con tipo, capacidad y tarifa por noche.</p>
+      <div id="habitaciones-lista" class="grid-cards"></div>
+    </section>
+
+    <!-- Login -->
+    <section id="view-login" class="view">
+      <h2>Iniciar sesión</h2>
+      <form id="form-login" class="card form-grid narrow">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" required value="admin@hotel.local" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" required value="admin123" />
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" type="submit">Entrar</button>
+        </div>
+        <p class="hint">Usuario demo: admin@hotel.local / admin123</p>
+      </form>
+    </section>
+
+    <!-- Registro -->
+    <section id="view-registro" class="view">
+      <h2>Registrar usuario</h2>
+      <form id="form-registro" class="card form-grid narrow">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" name="nombre" required />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" required />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" required minlength="6" />
+        </div>
+        <div class="field">
+          <label>Rol</label>
+          <select name="rol">
+            <option value="TURISTA">Turista</option>
+            <option value="RECEPCIONISTA">Recepcionista</option>
+            <option value="ADMIN">Administrador</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" type="submit">Crear cuenta</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Admin -->
+    <section id="view-admin" class="view">
+      <h2>Panel de administración</h2>
+      <p class="subtitle">Crear nueva habitación (requiere rol ADMIN).</p>
+
+      <div id="admin-locked" class="card lock">
+        🔒 Inicia sesión como ADMIN.
+      </div>
+
+      <form id="form-habitacion" class="card form-grid" style="display:none">
+        <div class="field">
+          <label>Número</label>
+          <input type="text" name="numero" required />
+        </div>
+        <div class="field">
+          <label>Tipo</label>
+          <select name="tipo" required>
+            <option value="INDIVIDUAL">Individual</option>
+            <option value="DOBLE">Doble</option>
+            <option value="SUITE">Suite</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Capacidad</label>
+          <input type="number" name="capacidad" min="1" max="10" required />
+        </div>
+        <div class="field">
+          <label>Precio por noche (CLP)</label>
+          <input type="number" name="precio_noche" min="1000" step="1000" required />
+        </div>
+        <div class="field">
+          <label>Estado</label>
+          <select name="estado">
+            <option value="DISPONIBLE">Disponible</option>
+            <option value="MANTENIMIENTO">Mantenimiento</option>
+            <option value="FUERA_SERVICIO">Fuera de servicio</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" type="submit">Crear habitación</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <!-- Modal edición reserva -->
+  <div id="modal-editar" class="modal">
+    <div class="modal-card">
+      <h3>Editar reserva <span id="edit-id"></span></h3>
+      <form id="form-editar" class="form-grid">
+        <div class="field">
+          <label>Fecha entrada</label>
+          <input type="date" name="fecha_entrada" required />
+        </div>
+        <div class="field">
+          <label>Fecha salida</label>
+          <input type="date" name="fecha_salida" required />
+        </div>
+        <div class="field">
+          <label>Nombre cliente</label>
+          <input type="text" name="cliente_nombre" />
+        </div>
+        <div class="field">
+          <label>Email cliente</label>
+          <input type="email" name="cliente_email" />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" id="btn-cerrar-modal">Cancelar</button>
+          <button type="submit" class="btn primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>Hotel Alberto · PRY3211 Ingeniería de Software · Duoc UC</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
